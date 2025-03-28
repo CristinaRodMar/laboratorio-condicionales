@@ -6,18 +6,15 @@ const mensajeGameOver = document.getElementById("game-over") as HTMLElement;
 const botonPlantarse = document.getElementById("stand") as HTMLButtonElement;
 const mensajePlantarse = document.getElementById("mensaje-plantarse") as HTMLElement;
 const botonNuevoJuego = document.getElementById("new-game") as HTMLButtonElement;
+const cardImage = document.getElementById("card-image") as HTMLImageElement; 
 
 function muestraPuntuacion(): void {
     document.getElementById("score")!.textContent = puntuacion.toString();
 }
 
 function sumaPuntuacion(carta: number): void {
-    if (carta === 10 || carta === 11 || carta === 12) {
-        puntuacion += 0.5;
-    } else {
-        puntuacion += carta;
-    }
-
+    const puntos = carta > 7 ? 0.5 : carta; 
+    puntuacion += puntos;
     muestraPuntuacion();
 
     if (puntuacion > 7.5) {
@@ -51,31 +48,35 @@ function mostrarMensajePlantarse(): void {
     botonNuevoJuego.style.display = "inline-block";
 }
 
-function dameCarta(): number {
-    let carta: number = Math.floor(Math.random() * 10) + 1;
+const dameNumeroAleatorio = () => Math.floor(Math.random() * 10) + 1;
 
-    if (carta > 7) {
-        carta += 2;
+const dameNumeroCarta = (numero: number) => (numero > 7 ? numero + 2 : numero);
+
+const mostrarUrlCarta = (urlCarta: string) => {
+    if (cardImage) {
+        cardImage.src = urlCarta;
     }
+};
 
-    console.log("Carta obtenida:", carta);
-    return carta;
+function dameCarta(): void {
+    const numeroAleatorio = dameNumeroAleatorio();
+    const carta = dameNumeroCarta(numeroAleatorio);
+    const urlCarta = obtenerUrlCarta(carta);
+    
+    mostrarUrlCarta(urlCarta);
+    sumaPuntuacion(carta);
 }
 
-boton.addEventListener("click", () => {
-    let carta: number = dameCarta();
-    const cardImage = document.getElementById("card-image") as HTMLImageElement;
-    cardImage.src = mostrarCarta(carta);
-    muestraPuntuacion();
-    sumaPuntuacion(carta);
-});
+if (boton) {
+    boton.addEventListener("click", dameCarta);
+}
 
 botonPlantarse.addEventListener("click", () => {
     mostrarMensajePlantarse();
     bloquearBoton();
 });
 
-function mostrarCarta(number: number): string {
+function obtenerUrlCarta(number: number): string {
     switch (number) {
         case 1: return "https://raw.githubusercontent.com/Lemoncode/fotos-ejemplos/main/cartas/copas/1_as-copas.jpg";
         case 2: return "https://raw.githubusercontent.com/Lemoncode/fotos-ejemplos/main/cartas/copas/2_dos-copas.jpg";
@@ -100,10 +101,11 @@ function iniciarNuevaPartida(): void {
 
     boton.disabled = false;
     botonPlantarse.disabled = false;
-
     botonNuevoJuego.style.display = "none";
+
+    mostrarUrlCarta("https://raw.githubusercontent.com/Lemoncode/fotos-ejemplos/main/cartas/back.jpg");
 }
 
-botonNuevoJuego.addEventListener("click", () => {
-    iniciarNuevaPartida();
-});
+botonNuevoJuego.addEventListener("click", iniciarNuevaPartida);
+
+iniciarNuevaPartida();
