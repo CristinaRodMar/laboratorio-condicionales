@@ -1,51 +1,73 @@
 import "./style.css";
 
 let puntuacion: number = 0;
-const boton = document.getElementById("order-card") as HTMLButtonElement;
-const mensajeGameOver = document.getElementById("game-over") as HTMLElement;
-const botonPlantarse = document.getElementById("stand") as HTMLButtonElement;
-const mensajePlantarse = document.getElementById("mensaje-plantarse") as HTMLElement;
-const botonNuevoJuego = document.getElementById("new-game") as HTMLButtonElement;
-const cardImage = document.getElementById("card-image") as HTMLImageElement; 
+
+const mensajeGameOver = document.getElementById("game-over");
+const botonNuevoJuego = document.getElementById("new-game");
+const boton = document.getElementById("order-card");
+const botonPlantarse = document.getElementById("stand");
+const mensajePlantarse = document.getElementById("mensaje-plantarse");
 
 function muestraPuntuacion(): void {
     document.getElementById("score")!.textContent = puntuacion.toString();
 }
 
-function sumaPuntuacion(carta: number): void {
-    const puntos = carta > 7 ? 0.5 : carta; 
-    puntuacion += puntos;
-    muestraPuntuacion();
+function obtenerPuntosCarta(carta: number) {
+    return carta > 7 ? 0.5 : carta; 
+}
 
-    if (puntuacion > 7.5) {
-        mostrarGameOver();
-        bloquearBoton();
-    }
+function actualizaPuntuacion(nuevosPuntos: number) {
+    puntuacion = nuevosPuntos;
+    muestraPuntuacion(); 
+}
+
+function sumaPuntuacion(puntos: number): number {
+    return puntuacion + puntos; 
 }
 
 function mostrarGameOver(): void {
-    mensajeGameOver.textContent = "Game Over";
-    mensajeGameOver.style.display = "block";
-    botonNuevoJuego.style.display = "inline-block";
+    if (mensajeGameOver instanceof HTMLElement && botonNuevoJuego instanceof HTMLButtonElement) {
+        mensajeGameOver.textContent = "Game Over";
+        mensajeGameOver.style.display = "block";
+        botonNuevoJuego.style.display = "inline-block";
+    }
 }
 
 function bloquearBoton(): void {
-    boton.disabled = true;
-    botonPlantarse.disabled = true;
+    if (boton instanceof HTMLButtonElement && botonPlantarse instanceof HTMLButtonElement) {
+        boton.disabled = true;
+        botonPlantarse.disabled = true;
+    }
+}
+
+function revisarPartida() {
+    if (puntuacion > 7.5) {
+        console.log("Game Over");
+        mostrarGameOver();
+    } else if (puntuacion === 7.5) {
+        console.log("Has ganado la partida");
+    }
 }
 
 function mostrarMensajePlantarse(): void {
     if (puntuacion < 4) {
-        mensajePlantarse.textContent = "Has sido muy conservador";
+        mostrarMensaje("Has sido muy conservador");
     } else if (puntuacion === 5) {
-        mensajePlantarse.textContent = "Te ha entrado el canguelo eh?";
+        mostrarMensaje("Te ha entrado el canguelo eh?");
     } else if (puntuacion >= 6 && puntuacion < 7) {
-        mensajePlantarse.textContent = "Casi casi...";
+        mostrarMensaje("Casi casi...");
     } else if (puntuacion === 7.5) {
-        mensajePlantarse.textContent = "¡Lo has clavado! ¡Enhorabuena!";
+        mostrarMensaje("¡Lo has clavado! ¡Enhorabuena!");
     }
-    mensajePlantarse.style.display = "block";
-    botonNuevoJuego.style.display = "inline-block";
+}
+
+function mostrarMensaje(mensaje: string) {
+    const mensajePlantarse = document.getElementById("mensaje-plantarse");
+
+    if (mensajePlantarse instanceof HTMLDivElement) {
+        mensajePlantarse.textContent = mensaje;
+        mensajePlantarse.style.display = "block";
+    }
 }
 
 const dameNumeroAleatorio = () => Math.floor(Math.random() * 10) + 1;
@@ -53,7 +75,8 @@ const dameNumeroAleatorio = () => Math.floor(Math.random() * 10) + 1;
 const dameNumeroCarta = (numero: number) => (numero > 7 ? numero + 2 : numero);
 
 const mostrarUrlCarta = (urlCarta: string) => {
-    if (cardImage) {
+    const cardImage = document.getElementById("card-image");
+    if (cardImage && cardImage instanceof HTMLImageElement) {
         cardImage.src = urlCarta;
     }
 };
@@ -62,19 +85,17 @@ function dameCarta(): void {
     const numeroAleatorio = dameNumeroAleatorio();
     const carta = dameNumeroCarta(numeroAleatorio);
     const urlCarta = obtenerUrlCarta(carta);
-    
     mostrarUrlCarta(urlCarta);
-    sumaPuntuacion(carta);
+    const puntosCarta = obtenerPuntosCarta(carta);
+    const puntosSumados = sumaPuntuacion(puntosCarta);
+    actualizaPuntuacion(puntosSumados); 
+    revisarPartida();
 }
 
-if (boton) {
-    boton.addEventListener("click", dameCarta);
-}
-
-botonPlantarse.addEventListener("click", () => {
+function plantarse() {
     mostrarMensajePlantarse();
     bloquearBoton();
-});
+}
 
 function obtenerUrlCarta(number: number): string {
     switch (number) {
@@ -96,16 +117,36 @@ function iniciarNuevaPartida(): void {
     puntuacion = 0;
     muestraPuntuacion();
 
-    mensajeGameOver.style.display = "none";
-    mensajePlantarse.style.display = "none";
+    if (mensajeGameOver instanceof HTMLElement) {
+        mensajeGameOver.style.display = "none";
+    }
 
-    boton.disabled = false;
-    botonPlantarse.disabled = false;
-    botonNuevoJuego.style.display = "none";
+    if (mensajePlantarse instanceof HTMLDivElement) {
+        mensajePlantarse.style.display = "none";
+    }
+
+    if (botonPlantarse instanceof HTMLButtonElement && boton instanceof HTMLButtonElement) {
+        botonPlantarse.disabled = false;
+        boton.disabled = false;
+    }
+
+    if (botonNuevoJuego instanceof HTMLButtonElement) {
+        botonNuevoJuego.style.display = "none";
+    }
 
     mostrarUrlCarta("https://raw.githubusercontent.com/Lemoncode/fotos-ejemplos/main/cartas/back.jpg");
 }
 
-botonNuevoJuego.addEventListener("click", iniciarNuevaPartida);
+if (boton instanceof HTMLButtonElement) {
+    boton.addEventListener("click", dameCarta);
+}
 
-iniciarNuevaPartida();
+if (botonPlantarse instanceof HTMLButtonElement) {
+    botonPlantarse.addEventListener("click", plantarse);
+}
+
+if (botonNuevoJuego instanceof HTMLButtonElement) {
+    botonNuevoJuego.addEventListener("click", iniciarNuevaPartida);
+}
+
+document.addEventListener("DOMContentLoaded", iniciarNuevaPartida);
