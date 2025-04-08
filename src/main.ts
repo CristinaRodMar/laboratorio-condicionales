@@ -9,20 +9,22 @@ const botonPlantarse = document.getElementById("stand");
 const mensajePlantarse = document.getElementById("mensaje-plantarse");
 
 function muestraPuntuacion(): void {
-    document.getElementById("score")!.textContent = puntuacion.toString();
+    const scoreElement = document.getElementById("score");
+    if (scoreElement !== null && scoreElement instanceof HTMLElement) {
+        scoreElement.textContent = puntuacion.toString();
+    }
 }
 
 function obtenerPuntosCarta(carta: number) {
-    return carta > 7 ? 0.5 : carta; 
+    return carta > 7 ? 0.5 : carta;
 }
 
 function actualizaPuntuacion(nuevosPuntos: number) {
     puntuacion = nuevosPuntos;
-    muestraPuntuacion(); 
 }
 
 function sumaPuntuacion(puntos: number): number {
-    return puntuacion + puntos; 
+    return puntuacion + puntos;
 }
 
 function mostrarGameOver(): void {
@@ -33,19 +35,29 @@ function mostrarGameOver(): void {
     }
 }
 
-function bloquearBoton(): void {
+function bloquearBotones(): void {
     if (boton instanceof HTMLButtonElement && botonPlantarse instanceof HTMLButtonElement) {
         boton.disabled = true;
         botonPlantarse.disabled = true;
     }
 }
 
+function activarBotones(): void {
+    if (boton instanceof HTMLButtonElement && botonPlantarse instanceof HTMLButtonElement) {
+        boton.disabled = false;
+        botonPlantarse.disabled = false;
+    }
+}
+
 function revisarPartida() {
     if (puntuacion > 7.5) {
-        console.log("Game Over");
+        mostrarMensaje("Game Over");
         mostrarGameOver();
+        bloquearBotones();
     } else if (puntuacion === 7.5) {
-        console.log("Has ganado la partida");
+        mostrarMensaje("¡Lo has clavado! ¡Enhorabuena!");
+        mostrarGameOver(); 
+        bloquearBotones();
     }
 }
 
@@ -63,7 +75,6 @@ function mostrarMensajePlantarse(): void {
 
 function mostrarMensaje(mensaje: string) {
     const mensajePlantarse = document.getElementById("mensaje-plantarse");
-
     if (mensajePlantarse instanceof HTMLDivElement) {
         mensajePlantarse.textContent = mensaje;
         mensajePlantarse.style.display = "block";
@@ -76,7 +87,7 @@ const dameNumeroCarta = (numero: number) => (numero > 7 ? numero + 2 : numero);
 
 const mostrarUrlCarta = (urlCarta: string) => {
     const cardImage = document.getElementById("card-image");
-    if (cardImage && cardImage instanceof HTMLImageElement) {
+    if (cardImage instanceof HTMLImageElement) {
         cardImage.src = urlCarta;
     }
 };
@@ -88,13 +99,17 @@ function dameCarta(): void {
     mostrarUrlCarta(urlCarta);
     const puntosCarta = obtenerPuntosCarta(carta);
     const puntosSumados = sumaPuntuacion(puntosCarta);
-    actualizaPuntuacion(puntosSumados); 
+    actualizaPuntuacion(puntosSumados);
+    muestraPuntuacion();
     revisarPartida();
 }
 
 function plantarse() {
     mostrarMensajePlantarse();
-    bloquearBoton();
+    bloquearBotones();
+    if (botonNuevoJuego instanceof HTMLButtonElement) {
+        botonNuevoJuego.style.display = "inline-block";
+    }
 }
 
 function obtenerUrlCarta(number: number): string {
@@ -113,10 +128,7 @@ function obtenerUrlCarta(number: number): string {
     }
 }
 
-function iniciarNuevaPartida(): void {
-    puntuacion = 0;
-    muestraPuntuacion();
-
+function ocultarMensajes(): void {
     if (mensajeGameOver instanceof HTMLElement) {
         mensajeGameOver.style.display = "none";
     }
@@ -124,11 +136,13 @@ function iniciarNuevaPartida(): void {
     if (mensajePlantarse instanceof HTMLDivElement) {
         mensajePlantarse.style.display = "none";
     }
+}
 
-    if (botonPlantarse instanceof HTMLButtonElement && boton instanceof HTMLButtonElement) {
-        botonPlantarse.disabled = false;
-        boton.disabled = false;
-    }
+function iniciarNuevaPartida(): void {
+    puntuacion = 0;
+    muestraPuntuacion();
+    ocultarMensajes();
+    activarBotones();
 
     if (botonNuevoJuego instanceof HTMLButtonElement) {
         botonNuevoJuego.style.display = "none";
